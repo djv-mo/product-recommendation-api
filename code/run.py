@@ -13,7 +13,7 @@ class PredictSchema(Schema):
     relationship_type = fields.String(required=True)
     income = fields.Float(missing = 30000.0)
     nationality = fields.String(missing= 'ES')
-    activity = fields.Integer(required=True)
+    activity = fields.String(required=True)
 
 
 app = Flask(__name__)
