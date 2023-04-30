@@ -5,11 +5,13 @@ __author__ : SRK
 """
 import csv
 import datetime
+import pickle
 from operator import sub
+
 import numpy as np
 import pandas as pd
 import xgboost as xgb
-from sklearn import preprocessing, ensemble
+from sklearn import ensemble, preprocessing
 
 mapping_dict = {
 'ind_empleado'  : {-99:0, 'N':1, 'B':2, 'F':3, 'A':4, 'S':5},
@@ -194,3 +196,7 @@ if __name__ == "__main__":
 	out_df = pd.DataFrame({'ncodpers':test_id, 'added_products':final_preds})
 	out_df.to_csv('sub_xgb_new.csv', index=False)
 	print(datetime.datetime.now()-start_time)
+	
+    # saving the trained model
+	with open('trained_model.pkl', 'wb') as file:
+		pickle.dump(model, file)
