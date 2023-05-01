@@ -6,13 +6,13 @@ from marshmallow import Schema, ValidationError, fields
 
 
 class PredictSchema(Schema):
-    age = fields.Integer(missing = 23)
+    age = fields.Integer(missing=23)
     gender = fields.String(required=True)
-    seniority = fields.Integer(missing = 11)
+    seniority = fields.Integer(missing=11)
     segment = fields.String(required=True)
     relationship_type = fields.String(required=True)
-    income = fields.Float(missing = 30000.0)
-    nationality = fields.String(missing= 'ES')
+    income = fields.Float(missing=30000.0)
+    nationality = fields.String(missing='ES')
     activity = fields.String(required=True)
 
 
@@ -25,49 +25,40 @@ class Predict(Resource):
         data = request.get_json()
 
         schema = PredictSchema()
+        # Mapping dictionaries
+        gender_mapping = {'male': 'V', 'female': 'H'}
+        segment_mapping = {'vip': '01 - TOP', 'student': '03 - UNIVERSITARIO'}
+        relationship_mapping = {
+            'inactive': 'I', 'former customer': 'P', 'former co-owner': 'N', 'potential': 'R'}
+        activity_mapping = {'inactive': 0, 'active': 1}
         try:
             # Validate request body against schema data types
             result = schema.load(data)
             # Validate gender to mapping dict
-            if result['gender'].lower() == 'male':
-                result['gender'] = 'V'
-            else:
-                result['gender'] = 'H'
+            result['gender'] = gender_mapping.get(
+                result['gender'].lower(), 'H')
+
             # Validate segment to mapping dict
-            if result['segment'].lower() == 'vip':
-                result['segment'] = '01 - TOP'
-            elif result['segment'].lower() == 'student':
-                result['segment'] = '03 - UNIVERSITARIO'
-            else:
-                result['segment'] = '02 - PARTICULARES'
+            result['segment'] = segment_mapping.get(
+                result['segment'].lower(), '02 - PARTICULARES')
+
             # Validate relationship_type to mapping dict
-            if result['relationship_type'].lower() == 'inactive':
-                result['relationship_type'] = 'I'
-            elif result['relationship_type'].lower() == 'former customer':
-                result['relationship_type'] = 'P'
-            elif result['relationship_type'].lower() == 'former co-owner':
-                result['relationship_type'] = 'N'
-            elif result['relationship_type'].lower() == 'potential':
-                result['relationship_type'] = 'R'
-            else:
-                result['relationship_type'] = 'A'
+            result['relationship_type'] = relationship_mapping.get(
+                result['relationship_type'].lower(), 'A')
+
             # Validate nationality to mapping dict using ISO 3166-1 alpha-2 standard
             if result['nationality']:
                 try:
-                    country = pycountry.countries.search_fuzzy(result['nationality'])[0]
-                    if country:
-                        result['nationality'] = country.alpha_2
+                    country = pycountry.countries.search_fuzzy(
+                        result['nationality'])[0]
+                    result['nationality'] = country.alpha_2 if country else 'ES'
                 except LookupError:
                     result['nationality'] = 'ES'
-            # Validate activity to mapping dict
-            if result['activity'].lower() == 'inactive':
-                result['activity'] = 0
-            else:
-                result['activity'] = 1
-            
 
-            
-            
+            # Validate activity to mapping dict
+            result['activity'] = activity_mapping.get(
+                result['activity'].lower(), 1 if result['activity'].lower() != 'inactive' else 0)
+
         except ValidationError as err:
             # Return a error message if validation fails
             return {'error': err.messages}, 400
