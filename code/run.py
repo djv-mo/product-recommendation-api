@@ -1,4 +1,5 @@
 # run.py
+import joblib
 import pycountry
 from flask import Flask, request
 from flask_restful import Api, Resource
@@ -16,6 +17,11 @@ class PredictSchema(Schema):
     activity = fields.String(required=True)
 
 
+# load trained model
+trained_model = open("trained_model.pkl", 'rb')
+model = joblib.load(trained_model)
+
+# init app
 app = Flask(__name__)
 api = Api(app)
 
