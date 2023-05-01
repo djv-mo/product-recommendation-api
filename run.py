@@ -8,7 +8,15 @@ import xgboost as xgb
 from flask import Flask, request
 from flask_restful import Api, Resource
 from marshmallow import Schema, ValidationError, fields
+
 from source_code import processData
+
+# Mapping dictionaries
+gender_mapping = {'male': 'V', 'female': 'H'}
+segment_mapping = {'vip': '01 - TOP', 'student': '03 - UNIVERSITARIO'}
+relationship_mapping = {
+    'inactive': 'I', 'former customer': 'P', 'former co-owner': 'N', 'potential': 'R'}
+activity_mapping = {'inactive': 0, 'active': 1}
 
 
 class PredictSchema(Schema):
@@ -36,12 +44,7 @@ class Predict(Resource):
         data = request.get_json()
 
         schema = PredictSchema()
-        # Mapping dictionaries
-        gender_mapping = {'male': 'V', 'female': 'H'}
-        segment_mapping = {'vip': '01 - TOP', 'student': '03 - UNIVERSITARIO'}
-        relationship_mapping = {
-            'inactive': 'I', 'former customer': 'P', 'former co-owner': 'N', 'potential': 'R'}
-        activity_mapping = {'inactive': 0, 'active': 1}
+
         try:
             # Validate request body against schema data types
             result = schema.load(data)
@@ -103,8 +106,8 @@ class Predict(Resource):
         }]
         # saving predict request to csv
         predict_request_df = pd.DataFrame(predict_request)
-        predict_request_df.to_csv('predict_request.csv', index=True)
-        # importing file to make predictions
+        predict_request_df.to_csv('predict_request.csv', index=False)
+        # importing predict file to make predictions
         predict_file = open("predict_request.csv")
         # processing data using processData fuction
         x_vars_list, y_vars_list, cust_dict = processData(predict_file, {})
@@ -127,4 +130,4 @@ class Predict(Resource):
 api.add_resource(Predict, '/predict')
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8000, debug=True)
+    app.run(host="0.0.0.0", port=5000, debug=True)

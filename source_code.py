@@ -210,6 +210,6 @@ if __name__ == "__main__":
     out_df.to_csv('sub_xgb_new.csv', index=False)
     print(datetime.datetime.now()-start_time)
 
-# saving the trained model
-    with open('trained_model.pkl', 'wb') as file:
-        pickle.dump(model, file)
+# # saving the trained model
+#     with open('trained_model.pkl', 'wb') as file:
+#         pickle.dump(model, file)
