@@ -1,0 +1,73 @@
+openapi: 3.0.0
+info:
+  title: Recommend Banking Products API Documentation
+  version: 1.0.0
+paths:
+  /predict:
+    post:
+      summary: Endpoint to make banking products predictions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PredictSchema"
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Recommendations:
+                    type: array
+                    items:
+                      type: string
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Error:
+                    type: string
+        "500":
+          description: error from our end
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Error:
+                    type: string
+components:
+  schemas:
+    PredictSchema:
+      type: object
+      properties:
+        age:
+          type: integer
+          default: 23
+        gender:
+          type: string
+          enum: [male, female]
+        seniority:
+          type: integer
+          default: 11
+        segment:
+          type: string
+          enum: [vip, student, individual]
+        relationship_type:
+          type: string
+          enum: [inactive, active, former customer, former co-owner, potential]
+        income:
+          type: number
+          default: 30000.0
+        nationality:
+          type: string
+          default: ES
+        activity:
+          type: string
+          enum: [inactive, active]

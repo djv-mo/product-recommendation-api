@@ -6,6 +6,7 @@ import pandas as pd
 import pycountry
 import xgboost as xgb
 from flask import Flask, request
+from flask_redoc import Redoc
 from flask_restful import Api, Resource
 from marshmallow import Schema, ValidationError, fields
 
@@ -19,6 +20,18 @@ relationship_mapping = {
 activity_mapping = {'inactive': 0, 'active': 1}
 
 
+# load trained model
+trained_model = open("trained_model.pkl", 'rb')
+model = pickle.load(trained_model)
+
+# init app
+app = Flask(__name__)
+api = Api(app)
+
+# redoc
+redoc = Redoc(app, 'PredictApi.yml')
+
+
 class PredictSchema(Schema):
     age = fields.Integer(missing=23)  # age
     gender = fields.String(required=True)  # sexo
@@ -30,17 +43,9 @@ class PredictSchema(Schema):
     activity = fields.String(required=True)  # ind_actividad_cliente
 
 
-# load trained model
-trained_model = open("trained_model.pkl", 'rb')
-model = pickle.load(trained_model)
-
-# init app
-app = Flask(__name__)
-api = Api(app)
-
-
 class Predict(Resource):
     def post(self):
+
         data = request.get_json()
 
         schema = PredictSchema()
@@ -75,9 +80,9 @@ class Predict(Resource):
 
         except ValidationError as err:
             # Return a error message if validation fails
-            return {'error': err.messages}, 400
+            return {'Error': err.messages}, 400
 
-        # Creating dynamic and static attributes based on test_ver2 dataset
+        # Creating predict_request attributes based on test_ver2 dataset
         predict_request = [{
             'fecha_dato': "2016-06-28",
             'ncodpers': 15889,
@@ -108,9 +113,8 @@ class Predict(Resource):
         predict_request_df = pd.DataFrame(predict_request)
         predict_request_df.to_csv('predict_request.csv', index=False)
         # importing predict file to make predictions
-        predict_file = open("predict_request.csv")
-        # processing data using processData fuction
-        x_vars_list, y_vars_list, cust_dict = processData(predict_file, {})
+        with open("predict_request.csv") as predict_file:
+            x_vars_list, y_vars_list, cust_dict = processData(predict_file, {})
         request_array = np.array(x_vars_list)
         # predicting
         request_dmatrix = xgb.DMatrix(request_array)
