@@ -79,11 +79,13 @@ class Predict(Resource):
                 result['activity'].lower(), 1 if result['activity'].lower() != 'inactive' else 0)
 
         except ValidationError as err:
-            # Return a error message if validation fails
-            return {'Error': err.messages}, 400
+            # Return an error message if validation fails
+            error_message = {'error': 'Validation Error',
+                             'details': err.messages}
+            return error_message, 400
 
         # Creating predict_request attributes based on test_ver2 dataset
-        predict_request = [{
+        predict_request = pd.DataFrame([{
             'fecha_dato': "2016-06-28",
             'ncodpers': 15889,
             'ind_empleado': 'F',
@@ -108,10 +110,9 @@ class Predict(Resource):
             'ind_actividad_cliente': result['activity'],
             'renta': result['income'],
             'segmento': result['segment']
-        }]
+        }])
         # saving predict request to csv
-        predict_request_df = pd.DataFrame(predict_request)
-        predict_request_df.to_csv('predict_request.csv', index=False)
+        predict_request.to_csv('predict_request.csv', index=False)
         # importing predict file to make predictions
         with open("predict_request.csv") as predict_file:
             x_vars_list, y_vars_list, cust_dict = processData(predict_file, {})
