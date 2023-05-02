@@ -104,9 +104,9 @@ class ProductsPredict(Resource):
             'segmento': result['segment']
         }])
         # saving predict request to csv
-        predict_request.to_csv('predict_request.csv', index=False)
+        predict_request.to_csv('products/predict_request.csv', index=False)
         # importing predict file to make predictions
-        with open("predict_request.csv") as predict_file:
+        with open("products/predict_request.csv") as predict_file:
             x_vars_list, y_vars_list, cust_dict = processData(predict_file, {})
         request_array = np.array(x_vars_list)
         # predicting
